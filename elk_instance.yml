@@ -1,0 +1,42 @@
+---
+
+- name: create an EC2 instance in AWS and set up ELK in it
+  hosts: local
+  
+  tasks:
+    - name: create ssh key pair from your public key, if not already present
+      ec2_key:
+        name: "{{key_pair_name}}"
+        key_material: "{{ item }}"
+        region: "{{ ec2_region }}"
+        state: present
+      with_file: cake_keys/seed.pub
+
+  tasks:
+    - name: create a Security Group
+      ec2_group:
+        name: "{{ security_group }}"
+        description: Security Group for webserver Servers
+        region: "{{ ec2_region }}"
+        rules:
+          - proto: tcp
+            from_port: 22
+            to_port: 22
+            cidr_ip: "{{security_group_ssh_ip_range}}"
+          - proto: tcp
+            from_port: 80
+            to_port: 80
+            cidr_ip: 0.0.0.0/0
+          - proto: tcp
+            from_port: 443
+            to_port: 443
+            cidr_ip: 0.0.0.0/0
+          - proto: tcp
+            from_port: 8080
+            to_port: 8080
+            cidr_ip: 0.0.0.0/0
+        rules_egress:
+          - proto: all
+            cidr_ip: 0.0.0.0/0
+      register: basic_firewall
+
