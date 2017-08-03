@@ -40,3 +40,15 @@
             cidr_ip: 0.0.0.0/0
       register: basic_firewall
 
+    - name: Launch the new EC2 Instance
+      ec2:
+        group: "{{ security_group }}"
+        instance_type: "{{ instance_type}}"
+        image: "{{ image }}"
+        wait: yes
+        region: "{{ ec2_region }}"
+        keypair: "{{key_pair_name}}"
+        count: "{{ count }}"
+      register: ec2
+        
+
